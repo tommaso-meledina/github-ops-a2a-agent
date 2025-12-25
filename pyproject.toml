@@ -1,0 +1,16 @@
+[project]
+name = "github-ops-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "a2a-sdk[http-server]>=0.3.22",
+    "dotenv>=0.9.9",
+    "fastapi>=0.127.0",
+    "langchain>=1.2.0",
+    "langchain-google-genai>=4.1.2",
+    "langchain-openai>=1.1.6",
+    "pygithub>=2.8.1",
+    "uvicorn>=0.40.0",
+]
