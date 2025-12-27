@@ -32,12 +32,12 @@ def main():
     agent_card = AgentCard(
         name="GitHub A2A Agent",
         description="An A2A agent exposing GitHub issue and PR skills",
-        url="http://localhost:8000/",
+        url="http://localhost:9999/",
         version="1.0.0",
-        capabilities=AgentCapabilities(streaming=False),
+        capabilities=AgentCapabilities(streaming=True),
         skills=[read_issue_skill, open_pr_skill],
-        default_input_modes=["application/json", "application/text"],
-        default_output_modes=["application/json", "application/text"]
+        default_input_modes=["application/json", "application/text", "text/event-stream"],
+        default_output_modes=["application/json", "application/text", "text/event-stream"]
     )
 
     request_handler = DefaultRequestHandler(

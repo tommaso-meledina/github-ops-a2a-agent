@@ -20,18 +20,22 @@ memory = MemorySaver()
 environment: AgentEnvironment = parse_env()
 
 @tool
-def read_github_issue(issue_number: int) -> dict:
+def read_github_issue(
+        repo_owner: str,
+        repo_name: str,
+        issue_number: int
+) -> dict:
     """
-    Read details of a GitHub issue given its numeric ID.
+    Read details of a GitHub issue given its numeric ID, the name of the repository hosting it, and the name of the owner of the repo.
     Returns a JSON-like dict with key fields.
 
     Args:
-        issue_number: GitHub Issue's numeric ID
+        repo_owner: owner of the GitHub repository hosting the issue (required)
+        repo_name: name of the GitHub repository hosting the issue (required)
+        issue_number: GitHub Issue's numeric ID (required)
     """
     gh = build_github_client()
-    owner = environment.github_owner
-    repo_name = environment.github_repo
-    retrieved_repo = gh.get_repo(f"{owner}/{repo_name}")
+    retrieved_repo = gh.get_repo(f"{repo_owner}/{repo_name}")
     issue = retrieved_repo.get_issue(number=issue_number)
     return {
         "url": issue.html_url,
@@ -45,6 +49,8 @@ def read_github_issue(issue_number: int) -> dict:
 
 @tool
 def open_github_pr(
+        repo_owner: str,
+        repo_name: str,
         head_branch: str,
         base_branch: str,
         title: str | None = None,
@@ -52,9 +58,11 @@ def open_github_pr(
         related_issue: int | None = None
 ) -> dict:
     """
-    Create a pull request on GitHub.
+    Create a pull request on GitHub. Either the `related_issue` parameter or the `title` and `body` parameters are required.
 
     Args:
+      repo_owner: owner of the GitHub repository where the PR should be created
+      repo_name: name of the GitHub repository where the PR should be created
       head_branch: The name of the branch containing the commits
       base_branch: The branch you want to merge into
       title: Pull request title; not honored if "related_issue" is provided (optional)
@@ -65,9 +73,7 @@ def open_github_pr(
       A dict with details of the created PR.
     """
     gh = build_github_client()
-    owner = environment.github_owner
-    repo_name = environment.github_repo
-    retrieved_repo = gh.get_repo(f"{owner}/{repo_name}")
+    retrieved_repo = gh.get_repo(f"{repo_owner}/{repo_name}")
 
     retrieved_issue = retrieved_repo.get_issue(number=related_issue) if related_issue is not None else None
 
@@ -107,10 +113,12 @@ class GitHubAgent:
         "Your sole purpose is to either use the 'read_github_issue' tool to read the contents of a GitHub issue, "
         "or use the 'open_github_pr' to open a Pull Request on GitHub. "
         'If the user asks about anything other than these two operations, '
-        'politely state that you cannot help with that topic and can only assist with the eforementioned operations. '
+        'politely state that you cannot help with that topic and can only assist with the aforementioned operations. '
         'Do not attempt to answer unrelated questions or use tools for other purposes. '
+        'Make sure that you are explicitly given all the necessary input parameters for the tools you can use; if one or more parameters are missing, ask the user to provide them. '
+        'Never use your tools unless the user explicitly gave you all the necessary input parameters for those tools. '
         'When answering, set response status to input_required if the user needs to provide more information to complete the request. '
-        'set response status to error if there is an error while processing the request.'
+        'set response status to error if there is an error while processing the request. '
         'Set response status to completed if the request is complete.'
     )
 
@@ -200,5 +208,3 @@ class GitHubAgent:
                 'Please try again.'
             ),
         }
-
-    SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']

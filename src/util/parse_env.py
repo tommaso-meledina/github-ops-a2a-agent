@@ -16,7 +16,8 @@ class AgentEnvironment:
 
 def parse_env() -> AgentEnvironment:
     load_dotenv()
-    for required_env in ["GITHUB_TOKEN", "GITHUB_OWNER", "GITHUB_REPO", "LLM_API_KEY"]:
+    # TODO: can do better
+    for required_env in ["GITHUB_TOKEN"]:
         if not os.environ.get(required_env):
             raise EnvironmentError(f"Missing required environment variable: {required_env}")
     # noinspection PyTypeChecker
