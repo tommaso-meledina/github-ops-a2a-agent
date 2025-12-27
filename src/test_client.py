@@ -50,7 +50,10 @@ async def main() -> None:
 
     base_url = 'http://0.0.0.0:9999'
 
-    async with httpx.AsyncClient() as httpx_client:
+    async with httpx.AsyncClient(
+            headers={
+                "Authorization": "Bearer YOUR_ACCESS_TOKEN"
+            }) as httpx_client:
         # Initialize A2ACardResolver
         resolver = A2ACardResolver(
             httpx_client=httpx_client,
@@ -130,8 +133,10 @@ async def main() -> None:
 
         # --8<-- [start:send_message]
         client = A2AClient(
-            httpx_client=httpx_client, agent_card=final_agent_card_to_use
+            httpx_client=httpx_client,
+            agent_card=final_agent_card_to_use
         )
+
         logger.info('A2AClient initialized.')
 
         first_query = 'fetch the contents of issue 1 on repo github-ops-mcp-server owner by tommaso-meledina'
@@ -146,7 +151,8 @@ async def main() -> None:
             },
         }
         request = SendMessageRequest(
-            id=str(uuid4()), params=MessageSendParams(**send_message_payload)
+            id=str(uuid4()),
+            params=MessageSendParams(**send_message_payload)
         )
 
         print(f"Q: {first_query}")

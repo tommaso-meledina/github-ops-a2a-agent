@@ -1,10 +1,11 @@
-from a2a.types import AgentSkill, AgentCard, AgentCapabilities
+from a2a.types import AgentSkill, AgentCard, AgentCapabilities, SecurityScheme
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
 
 import uvicorn
 
+from src.auth_middleware import BearerAuthMiddleware
 from src.github_agent_executor import GitHubAgentExecutor
 
 
@@ -37,7 +38,8 @@ def main():
         capabilities=AgentCapabilities(streaming=True),
         skills=[read_issue_skill, open_pr_skill],
         default_input_modes=["application/json", "application/text", "text/event-stream"],
-        default_output_modes=["application/json", "application/text", "text/event-stream"]
+        default_output_modes=["application/json", "application/text", "text/event-stream"],
+        security=[{ "bearerAuth": [] }]
     )
 
     request_handler = DefaultRequestHandler(
@@ -48,9 +50,11 @@ def main():
     server = A2AStarletteApplication(
         agent_card=agent_card,
         http_handler=request_handler
-    )
+    ).build()
 
-    uvicorn.run(server.build(), host='0.0.0.0', port=9999)
+    server.add_middleware(BearerAuthMiddleware)
+
+    uvicorn.run(server, host='0.0.0.0', port=9999)
 
 
 if __name__ == "__main__":
